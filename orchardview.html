@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrchardView · Technical Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:            #f8fafc;
+    --surface:       #ffffff;
+    --border:        #e2e8f0;
+    --text:          #0f172a;
+    --text-2:        #475569;
+    --text-muted:    #94a3b8;
+    --nav-bg:        #0f172a;
+    --nav-text:      #f1f5f9;
+    --nav-muted:     #94a3b8;
+    --accent:        #22c55e;
+    --accent-dark:   #16a34a;
+    --blue:          #2563eb;
+    --blue-bg:       #eff6ff;
+    --blue-border:   #bfdbfe;
+    --green-bg:      #f0fdf4;
+    --green-border:  #bbf7d0;
+    --purple:        #7c3aed;
+    --purple-bg:     #f5f3ff;
+    --purple-border: #ddd6fe;
+    --orange:        #d97706;
+    --orange-bg:     #fffbeb;
+    --orange-border: #fde68a;
+    --red:           #dc2626;
+    --red-bg:        #fef2f2;
+    --red-border:    #fecaca;
+    --shadow-sm:     0 1px 3px rgba(0,0,0,.06);
+    --shadow-md:     0 4px 16px rgba(0,0,0,.07);
+    --r-sm: 6px; --r-md: 10px; --r-lg: 16px;
+    --font: 'Inter', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--nav-bg);
+    height: 64px;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: #0f172a;
+  }
+  .nav-text { display: flex; flex-direction: column; }
+  .nav-title  { font-size: 15px; font-weight: 600; color: var(--nav-text); line-height: 1.2; }
+  .nav-sub    { font-size: 11px; color: var(--nav-muted); }
+  .nav-right  { display: flex; align-items: center; gap: 10px; }
+  .nav-tag {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    color: var(--nav-muted);
+    font-size: 11px; font-family: var(--mono);
+    padding: 3px 10px; border-radius: 100px;
+  }
+  .nav-back {
+    color: var(--nav-muted); font-size: 13px; text-decoration: none;
+    border: 1px solid rgba(255,255,255,.12);
+    padding: 5px 12px; border-radius: var(--r-sm);
+    transition: color .15s, border-color .15s;
+  }
+  .nav-back:hover { color: var(--nav-text); border-color: rgba(255,255,255,.3); }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 24px 100px;
+    gap: 36px;
+    align-items: start;
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    position: sticky;
+    top: 84px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .toc-label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 10px;
+    padding: 0 6px;
+  }
+
+  .toc { list-style: none; display: flex; flex-direction: column; gap: 1px; }
+
+  .toc a {
+    display: block; font-size: 12.5px; color: var(--text-2);
+    text-decoration: none; padding: 5px 8px;
+    border-radius: var(--r-sm);
+    transition: background .15s, color .15s;
+    line-height: 1.4;
+  }
+  .toc a:hover { background: var(--bg); color: var(--text); }
+
+  .toc .sub a {
+    padding-left: 20px; font-size: 12px; color: var(--text-muted);
+  }
+  .toc .sub a:hover { color: var(--text-2); }
+
+  .toc-divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+  /* ── CONTENT ── */
+  .content { min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+
+  /* Hero */
+  .hero {
+    background: var(--nav-bg);
+    border-radius: var(--r-lg);
+    padding: 44px 40px 40px;
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at top right, rgba(34,197,94,.13) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(34,197,94,.12);
+    border: 1px solid rgba(34,197,94,.25);
+    color: var(--accent);
+    font-size: 11px; font-weight: 500;
+    padding: 4px 12px; border-radius: 100px;
+    margin-bottom: 20px;
+  }
+  .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero h1 {
+    font-size: 32px; font-weight: 700;
+    color: #f1f5f9; letter-spacing: -.6px; line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .hero p {
+    font-size: 15px; color: var(--nav-muted);
+    line-height: 1.7; max-width: 600px;
+  }
+  .hero-pills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px;
+  }
+  .hero-pill {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #94a3b8;
+    font-size: 11px; font-family: var(--mono);
+    padding: 4px 12px; border-radius: 100px;
+  }
+
+  /* Pipeline steps banner */
+  .pipeline-strip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 20px 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .pipeline-strip h3 {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 16px;
+  }
+  .pipeline-steps {
+    display: flex; align-items: center; gap: 0;
+    overflow-x: auto; padding-bottom: 4px;
+  }
+  .p-step {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; flex-shrink: 0; min-width: 90px;
+  }
+  .p-step-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--green-bg); color: var(--accent-dark);
+    border: 2px solid var(--green-border);
+  }
+  .p-step-label {
+    font-size: 10px; font-weight: 500; text-align: center;
+    color: var(--text-2); line-height: 1.3; max-width: 80px;
+  }
+  .p-arrow {
+    font-size: 14px; color: var(--border);
+    flex-shrink: 0; margin: 0 2px; padding-bottom: 20px;
+  }
+
+  /* Section cards */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .section-icon {
+    width: 38px; height: 38px; border-radius: var(--r-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0; border: 1px solid;
+  }
+  .si-green  { background: var(--green-bg);  border-color: var(--green-border); }
+  .si-blue   { background: var(--blue-bg);   border-color: var(--blue-border); }
+  .si-purple { background: var(--purple-bg); border-color: var(--purple-border); }
+  .si-orange { background: var(--orange-bg); border-color: var(--orange-border); }
+
+  .section-header-text { flex: 1; }
+  .section-header h2 {
+    font-size: 17px; font-weight: 700;
+    color: var(--text); letter-spacing: -.2px;
+  }
+  .section-header p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+  .section-body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+
+  /* Step cards inside section */
+  .step-card {
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+
+  .step-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: var(--nav-bg); color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .step-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .step-purpose { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+
+  .step-output-badge {
+    margin-left: auto;
+    font-size: 10px; font-weight: 500;
+    background: var(--green-bg); color: var(--accent-dark);
+    border: 1px solid var(--green-border);
+    padding: 2px 8px; border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .step-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 14px; }
+
+  .sub-label {
+    font-size: 10px; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  ul.doc-list {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 5px;
+  }
+  ul.doc-list li {
+    font-size: 13px; color: var(--text-2);
+    display: flex; align-items: flex-start; gap: 8px;
+    line-height: 1.5;
+  }
+  ul.doc-list li::before {
+    content: '›';
+    color: var(--accent); font-weight: 700;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  /* Code block */
+  .code-block {
+    background: #0f172a;
+    border-radius: var(--r-sm);
+    padding: 16px 18px;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.7;
+    white-space: pre;
+  }
+  .code-block .kw  { color: #c084fc; }
+  .code-block .fn  { color: #60a5fa; }
+  .code-block .str { color: #86efac; }
+  .code-block .cmt { color: #475569; font-style: italic; }
+  .code-block .num { color: #fb923c; }
+
+  /* Feature grid */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .feat-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 14px 16px;
+  }
+  .feat-card-title {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .feat-card p { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+  /* Info row / key-value */
+  .kv-row {
+    display: flex; gap: 8px; align-items: flex-start;
+    font-size: 13px;
+  }
+  .kv-key {
+    font-weight: 600; color: var(--text); min-width: 140px;
+    flex-shrink: 0;
+  }
+  .kv-val { color: var(--text-2); }
+
+  /* Inline badge */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 100px;
+    font-size: 11px; font-weight: 500; border: 1px solid;
+  }
+  .badge-green  { background: var(--green-bg);  color: var(--accent-dark); border-color: var(--green-border); }
+  .badge-blue   { background: var(--blue-bg);   color: var(--blue);        border-color: var(--blue-border); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple);      border-color: var(--purple-border); }
+  .badge-orange { background: var(--orange-bg); color: var(--orange);      border-color: var(--orange-border); }
+
+  /* Data flow */
+  .flow-list {
+    display: flex; flex-direction: column; gap: 6px;
+    list-style: none; counter-reset: flow;
+  }
+  .flow-list li {
+    counter-increment: flow;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--r-sm); font-size: 13px; color: var(--text-2);
+  }
+  .flow-list li::before {
+    content: counter(flow);
+    min-width: 22px; height: 22px; border-radius: 50%;
+    background: var(--nav-bg); color: var(--accent);
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .flow-list li strong { color: var(--text); }
+
+  /* Requirements table */
+  .req-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .req-card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 14px 16px;
+  }
+  .req-card h4 {
+    font-size: 12px; font-weight: 600; color: var(--text);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+
+  /* Footer */
+  footer {
+    background: var(--nav-bg);
+    padding: 28px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  footer span { font-size: 13px; color: var(--nav-muted); }
+  .footer-pills { display: flex; gap: 8px; }
+  .footer-pill {
+    font-size: 11px; color: var(--nav-muted);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    padding: 3px 10px; border-radius: 100px;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-wrap { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+    nav { padding: 0 16px; }
+    .hero { padding: 28px 20px; }
+    .hero h1 { font-size: 24px; }
+    .req-grid { grid-template-columns: 1fr; }
+    .pipeline-steps { gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div class="nav-logo">LC</div>
+    <div class="nav-text">
+      <span class="nav-title">OrchardView</span>
+      <span class="nav-sub">Technical Documentation</span>
+    </div>
+  </a>
+  <div class="nav-right">
+    <span class="nav-tag">v1.0</span>
+    <a class="nav-back" href="https://lcoupal.github.io/orchard-view/">← View App</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- SIDEBAR TOC -->
+  <aside class="sidebar">
+    <div class="toc-label">On this page</div>
+    <ul class="toc">
+      <li><a href="#overview">System Overview</a></li>
+      <li><a href="#pipeline">Pipeline Steps</a></li>
+      <ul class="toc sub">
+        <li><a href="#step1">1 · PDF Extraction</a></li>
+        <li><a href="#step2">2 · Segmentation</a></li>
+        <li><a href="#step3">3 · XML Conversion</a></li>
+        <li><a href="#step4">4 · JSON-LD Semantic</a></li>
+        <li><a href="#step5">5 · Graph Generation</a></li>
+        <li><a href="#step6">6 · Web Application</a></li>
+        <li><a href="#step7">7 · AI Enhancement</a></li>
+        <li><a href="#step8">8 · Integration</a></li>
+      </ul>
+      <div class="toc-divider"></div>
+      <li><a href="#frontend">React Frontend</a></li>
+      <ul class="toc sub">
+        <li><a href="#f1">Data Import</a></li>
+        <li><a href="#f2">Filtering</a></li>
+        <li><a href="#f3">Data Table</a></li>
+        <li><a href="#f4">NL Search</a></li>
+        <li><a href="#f5">Dashboard</a></li>
+        <li><a href="#f6">Graph Viz</a></li>
+      </ul>
+      <div class="toc-divider"></div>
+      <li><a href="#integration">Integration</a></li>
+      <li><a href="#requirements">Requirements</a></li>
+    </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- HERO -->
+    <div class="hero" id="overview">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Educational Technology · Design Systems
+      </div>
+      <h1>OrchardView: Complete Educational Content Processing &amp; Management System</h1>
+      <p>An 8-step automated processing pipeline that transforms static PDF-based educational materials into an intelligent, interactive learning management platform with AI-enhanced metadata and professional visualization tools.</p>
+      <div class="hero-pills">
+        <span class="hero-pill">React</span>
+        <span class="hero-pill">D3.js</span>
+        <span class="hero-pill">Python</span>
+        <span class="hero-pill">JSON-LD</span>
+        <span class="hero-pill">Ollama AI</span>
+        <span class="hero-pill">MiniSearch</span>
+        <span class="hero-pill">WCAG 2.2 AA</span>
+      </div>
+    </div>
+
+    <!-- PIPELINE VISUAL -->
+    <div class="pipeline-strip" id="pipeline">
+      <h3>8-Step Processing Pipeline</h3>
+      <div class="pipeline-steps">
+        <div class="p-step"><div class="p-step-num">1</div><div class="p-step-label">PDF Extraction</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">2</div><div class="p-step-label">Segmentation</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">3</div><div class="p-step-label">XML Convert</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">4</div><div class="p-step-label">JSON-LD</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">5</div><div class="p-step-label">Graph Data</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">6</div><div class="p-step-label">Web App</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">7</div><div class="p-step-label">AI Enhance</div></div>
+        <div class="p-arrow">→</div>
+        <div class="p-step"><div class="p-step-num">8</div><div class="p-step-label">Deploy</div></div>
+      </div>
+    </div>
+
+    <!-- PART I: BACKEND PIPELINE -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon si-green">⚙️</div>
+        <div class="section-header-text">
+          <h2>Part I · Backend Processing Pipeline</h2>
+          <p>Eight automated steps from raw PDF to deployable learning system</p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- Step 1 -->
+        <div class="step-card" id="step1">
+          <div class="step-header">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">PDF Bookmark Structure Extraction</div>
+              <div class="step-purpose">Transform unstructured PDF bookmarks into organized, machine-readable course hierarchy</div>
+            </div>
+            <span class="step-output-badge">→ CSV</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Technical Implementation</div>
+              <ul class="doc-list">
+                <li>Python script analyzes PDF bookmark metadata</li>
+                <li>Hierarchical parsing algorithm detects course structure patterns</li>
+                <li>Automated classification of content types (modules, topics, lessons, assets)</li>
+                <li>Sequence code generation system for systematic organization</li>
+                <li>CSV export with complete page number mapping</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sub-label">Key Algorithms</div>
+              <ul class="doc-list">
+                <li>Bookmark depth analysis for hierarchy detection</li>
+                <li>Pattern recognition for special content types (Introduction, Practice Problems, Solutions)</li>
+                <li>Sequential numbering system with fallback generation</li>
+                <li>Validation logic ensuring complete content coverage</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card" id="step2">
+          <div class="step-header">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Intelligent PDF Segmentation</div>
+              <div class="step-purpose">Break down monolithic course PDF into individual, manageable lesson files</div>
+            </div>
+            <span class="step-output-badge">→ PDF files</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Processing Logic</div>
+              <ul class="doc-list">
+                <li>PDF boundary detection using hierarchy data from Step 1</li>
+                <li>Module-topic-lesson boundary identification</li>
+                <li>Page range calculation for precise extraction</li>
+                <li>File naming pattern: <code style="font-family:var(--mono);font-size:11px;background:#f1f5f9;padding:1px 5px;border-radius:3px;">[SequenceCode]_[ContentTitle].pdf</code></li>
+                <li>Organized folder structure creation with quality assurance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card" id="step3">
+          <div class="step-header">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Batch PDF-to-XML Conversion</div>
+              <div class="step-purpose">Convert proprietary PDF format to standardized XML for consistent text extraction</div>
+            </div>
+            <span class="step-output-badge">→ XML 1.0</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Technical Implementation</div>
+              <ul class="doc-list">
+                <li>Adobe Acrobat Pro batch processing configuration</li>
+                <li>Automated workflow for bulk conversion operations</li>
+                <li>Error handling and retry mechanisms</li>
+                <li>Output validation and quality checks</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sub-label">System Requirements</div>
+              <ul class="doc-list">
+                <li>Adobe Acrobat Pro for batch processing capabilities</li>
+                <li>Sufficient storage allocation for XML file generation</li>
+                <li>Network resources for processing queue management</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card" id="step4">
+          <div class="step-header">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">XML to JSON-LD Semantic Conversion</div>
+              <div class="step-purpose">Transform XML data into semantic web format that AI systems can understand and process</div>
+            </div>
+            <span class="step-output-badge">→ JSON-LD</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Semantic Processing Features</div>
+              <ul class="doc-list">
+                <li>Custom XML parsing engine for structured content extraction</li>
+                <li>RDF triple generation using educational ontology namespace</li>
+                <li>Entity extraction (headings, paragraphs, images, lists)</li>
+                <li>Relationship preservation between content elements</li>
+                <li>Schema.org educational markup integration</li>
+                <li>Metadata enrichment for improved discoverability</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-card" id="step5">
+          <div class="step-header">
+            <div class="step-num">5</div>
+            <div>
+              <div class="step-title">Graph Data Structure Generation</div>
+              <div class="step-purpose">Create interconnected knowledge graph for intelligent navigation and AI agents</div>
+            </div>
+            <span class="step-output-badge">→ graph-data_lessons.json</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Graph Architecture</div>
+              <ul class="doc-list">
+                <li><strong>Nodes</strong> — Course elements with rich metadata for AI processing</li>
+                <li><strong>Sequential Links</strong> — Learning progression optimization</li>
+                <li><strong>Hierarchical Links</strong> — Prerequisite and dependency mapping</li>
+                <li><strong>Resource Links</strong> — Multi-format content connections (PDF, JSON-LD, metadata)</li>
+                <li><strong>Semantic Relationships</strong> — Context preservation for intelligent systems</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step-card" id="step6">
+          <div class="step-header">
+            <div class="step-num">6</div>
+            <div>
+              <div class="step-title">Interactive Web Application Development</div>
+              <div class="step-purpose">Human-friendly interface for content management and navigation</div>
+            </div>
+            <span class="step-output-badge">→ hierarchical_lessons_viewer.html</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Application Features</div>
+              <ul class="doc-list">
+                <li>Visual curriculum navigation with interactive elements</li>
+                <li>Administrative dashboard with analytics</li>
+                <li>Search and filtering capabilities</li>
+                <li>Export tools for various data formats</li>
+                <li>Mobile-responsive design with accessibility features</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 7 -->
+        <div class="step-card" id="step7">
+          <div class="step-header">
+            <div class="step-num">7</div>
+            <div>
+              <div class="step-title">AI-Powered Content Enhancement</div>
+              <div class="step-purpose">Automatically generate educational metadata, summaries, and insights via Ollama AI</div>
+            </div>
+            <span class="step-output-badge">→ AI-enriched metadata</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">AI Processing Pipeline</div>
+              <ul class="doc-list">
+                <li>Lesson content analysis and summarization</li>
+                <li>Key learning points identification</li>
+                <li>Learning outcomes extraction with measurable objectives</li>
+                <li>Prerequisites and dependencies mapping</li>
+                <li>Vocabulary and concept extraction</li>
+                <li>Category tagging and classification</li>
+                <li>Educational standards alignment</li>
+                <li>Bloom's taxonomy classification of learning objectives</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 8 -->
+        <div class="step-card" id="step8">
+          <div class="step-header">
+            <div class="step-num">8</div>
+            <div>
+              <div class="step-title">System Integration and Deployment</div>
+              <div class="step-purpose">Merge all processed data into unified system ready for production</div>
+            </div>
+            <span class="step-output-badge">→ Production LMS</span>
+          </div>
+          <div class="step-body">
+            <div>
+              <div class="sub-label">Integration Capabilities</div>
+              <ul class="doc-list">
+                <li>Multi-source data integration algorithms</li>
+                <li>JSON file merging with ID-based matching</li>
+                <li>Comprehensive metadata injection system</li>
+                <li>Data validation and integrity verification</li>
+                <li>Provenance tracking for content lineage</li>
+                <li>Scalable architecture for multiple courses</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PART II: REACT FRONTEND -->
+    <div class="section-card" id="frontend">
+      <div class="section-header">
+        <div class="section-icon si-blue">⚛️</div>
+        <div class="section-header-text">
+          <h2>Part II · React Frontend Application</h2>
+          <p>Enterprise-grade data management interface built with React, D3.js, and MiniSearch</p>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <div>
+          <div class="sub-label">Core Architecture</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="kv-row"><span class="kv-key">Main Component</span><span class="kv-val"><code style="font-family:var(--mono);font-size:12px;">CourseDataTablePreview</code> — Enterprise-grade data management interface</span></div>
+            <div class="kv-row"><span class="kv-key">Technology Stack</span><span class="kv-val">React hooks · D3.js visualizations · MiniSearch</span></div>
+            <div class="kv-row"><span class="kv-key">Design Pattern</span><span class="kv-val">Component-based architecture with React hooks state management</span></div>
+          </div>
+        </div>
+
+        <!-- Feature 1 -->
+        <div class="step-card" id="f1">
+          <div class="step-header">
+            <div class="step-num" style="background:var(--blue-bg);color:var(--blue);">1</div>
+            <div>
+              <div class="step-title">Data Import and Processing System</div>
+              <div class="step-purpose">JSON upload with nested structure transformation to flat table format</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="doc-list">
+              <li>JSON file upload with comprehensive error handling</li>
+              <li>Nested structure transformation: Modules → Topics → Lessons → flat table</li>
+              <li>Hierarchical relationship and sequence ordering preservation</li>
+              <li>Fallback ID generation for incomplete data</li>
+            </ul>
+            <div class="code-block">
+<pre><span class="kw">const</span> <span class="fn">transformJsonData</span> = <span class="fn">useCallback</span>((data) => {
+  <span class="kw">const</span> flatData = [];
+  <span class="kw">let</span> seq = <span class="num">1</span>;
+
+  Object.entries(data).forEach(([moduleKey, moduleData]) => {
+    <span class="cmt">// Module processing with ID preference/fallback</span>
+    <span class="kw">const</span> moduleID  = moduleData.ID || <span class="str">`LM${moduleIndex}`</span>;
+    <span class="kw">const</span> moduleSeq = Number(moduleData.Sequence) || (seq++);
+    <span class="cmt">// Hierarchical processing for topics and lessons</span>
+    <span class="cmt">// Maintain parent-child relationships, sort by sequence</span>
+  });
+
+  <span class="kw">return</span> flatData.sort((a, b) =>
+    (Number(a.sequence) || <span class="num">0</span>) - (Number(b.sequence) || <span class="num">0</span>));
+}, []);</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="step-card" id="f2">
+          <div class="step-header">
+            <div class="step-num" style="background:var(--blue-bg);color:var(--blue);">2</div>
+            <div>
+              <div class="step-title">Advanced Multi-Layer Filtering System</div>
+              <div class="step-purpose">Cascading dropdowns with dependency management and full-text search</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="doc-list">
+              <li><strong>Cascading Dropdowns</strong> — Module → Topic → Lesson → Learning Outcome with dependency management</li>
+              <li><strong>Content Search</strong> — Full-text across summaries, concepts, tags, learning outcomes</li>
+              <li><strong>ID-Based Lookup</strong> — Direct identifier search with autocomplete</li>
+              <li><strong>Reset Logic</strong> — Dependent selection clearing when parent filters change</li>
+            </ul>
+            <div class="code-block">
+<pre><span class="kw">const</span> availableTopics = <span class="fn">useMemo</span>(() => {
+  <span class="kw">const</span> scope = selectedModule === <span class="str">'All'</span> ? jsonData
+    : jsonData.filter(r => (r.module || <span class="str">''</span>) === selectedModule);
+  <span class="kw">return</span> <span class="fn">uniqueSorted</span>(scope.map(r => r.topic || <span class="str">''</span>));
+}, [jsonData, selectedModule]);</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="step-card" id="f3">
+          <div class="step-header">
+            <div class="step-num" style="background:var(--blue-bg);color:var(--blue);">3</div>
+            <div>
+              <div class="step-title">Enterprise Data Table Component</div>
+              <div class="step-purpose">Full keyboard navigation, sorting, pagination, and CSV export</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <div class="feat-grid">
+              <div class="feat-card">
+                <div class="feat-card-title">⌨️ Keyboard Nav</div>
+                <p>Arrow keys, Page Up/Down, Home/End — full keyboard accessibility</p>
+              </div>
+              <div class="feat-card">
+                <div class="feat-card-title">↕ Column Sort</div>
+                <p>Visual sort indicators on all columns with configurable ordering</p>
+              </div>
+              <div class="feat-card">
+                <div class="feat-card-title">📄 Pagination</div>
+                <p>Configurable page sizes with smooth navigation controls</p>
+              </div>
+              <div class="feat-card">
+                <div class="feat-card-title">📤 CSV Export</div>
+                <p>One-click export of filtered data for external analysis</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="step-card" id="f4">
+          <div class="step-header">
+            <div class="step-num" style="background:var(--blue-bg);color:var(--blue);">4</div>
+            <div>
+              <div class="step-title">Natural Language Search System</div>
+              <div class="step-purpose">Power BI-style intent recognition with MiniSearch fuzzy matching</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="doc-list">
+              <li>MiniSearch library integration for semantic search</li>
+              <li>Intent recognition: SHOW · COUNT · FILTER · COMPARE · TOP</li>
+              <li>Entity extraction for modules, topics, concepts, tags</li>
+              <li>Query confidence scoring and autocomplete suggestions</li>
+            </ul>
+            <div class="code-block">
+<pre><span class="kw">const</span> miniSearch = <span class="kw">new</span> <span class="fn">MiniSearch</span>({
+  fields: [<span class="str">'label'</span>, <span class="str">'summary'</span>, <span class="str">'concepts'</span>, <span class="str">'tags'</span>,
+           <span class="str">'learning_outcome'</span>, <span class="str">'searchText'</span>],
+  storeFields: [<span class="str">'id'</span>, <span class="str">'type'</span>, <span class="str">'label'</span>, <span class="str">'module'</span>, <span class="str">'topic'</span>],
+  searchOptions: {
+    boost:  { label: <span class="num">3</span>, summary: <span class="num">2</span>, concepts: <span class="num">2</span>, tags: <span class="num">1.5</span> },
+    fuzzy:  <span class="num">0.2</span>,
+    prefix: <span class="kw">true</span>
+  }
+});</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="step-card" id="f5">
+          <div class="step-header">
+            <div class="step-num" style="background:var(--blue-bg);color:var(--blue);">5</div>
+            <div>
+              <div class="step-title">Interactive Dashboard System</div>
+              <div class="step-purpose">Analytics cards, bar charts, pie charts, and SVG donut progress indicators</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="doc-list">
+              <li>Summary statistics cards with gradient styling</li>
+              <li>CSS-based bar charts with animation</li>
+              <li>Conic gradient pie charts for distribution visualization</li>
+              <li>Module breakdown table with completion tracking</li>
+              <li>Progress indicators using SVG donut charts</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="step-card" id="f6">
+          <div class="step-header">
+            <div class="step-num" style="background:var(--blue-bg);color:var(--blue);">6</div>
+            <div>
+              <div class="step-title">Force-Directed Graph Visualization</div>
+              <div class="step-purpose">D3.js interactive network graph with physics simulation and real-time sync</div>
+            </div>
+          </div>
+          <div class="step-body">
+            <ul class="doc-list">
+              <li>Interactive network graph showing course structure relationships</li>
+              <li>Hierarchical node positioning with automatic layout</li>
+              <li>Real-time filtering synchronized with main application</li>
+              <li>Drag-and-drop interaction with physics simulation</li>
+              <li>Node type visibility controls</li>
+            </ul>
+            <div class="code-block">
+<pre><span class="kw">const</span> simulation = d3.<span class="fn">forceSimulation</span>(nodes)
+  .force(<span class="str">'link'</span>,      d3.<span class="fn">forceLink</span>(links).id(d => d.id).strength(<span class="num">0.2</span>))
+  .force(<span class="str">'charge'</span>,    d3.<span class="fn">forceManyBody</span>().strength(<span class="num">-200</span>))
+  .force(<span class="str">'center'</span>,    d3.<span class="fn">forceCenter</span>(width / <span class="num">2</span>, height / <span class="num">2</span>))
+  .force(<span class="str">'collision'</span>, d3.<span class="fn">forceCollide</span>().radius(d => d.size + <span class="num">30</span>));</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- INTEGRATION -->
+    <div class="section-card" id="integration">
+      <div class="section-header">
+        <div class="section-icon si-purple">🔗</div>
+        <div class="section-header-text">
+          <h2>System Integration &amp; Deployment</h2>
+          <p>Data flow architecture, quality assurance, and business value</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div>
+          <div class="sub-label">Data Flow Architecture</div>
+          <ol class="flow-list">
+            <li><strong>PDF Processing Pipeline</strong> → Structured JSON output</li>
+            <li><strong>OrchardView React Application</strong> → Consumes pipeline output</li>
+            <li><strong>Interactive Visualization</strong> → Real-time data exploration</li>
+            <li><strong>Export Capabilities</strong> → Data analysis and reporting</li>
+          </ol>
+        </div>
+        <div>
+          <div class="sub-label">Business Value</div>
+          <div class="feat-grid">
+            <div class="feat-card">
+              <div class="feat-card-title">⏱ Time Savings</div>
+              <p>Reduced manual processing time from hours to minutes per course</p>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card-title">🔍 Discoverability</div>
+              <p>AI-enhanced metadata for improved search and content discovery</p>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card-title">📐 Consistency</div>
+              <p>Uniform content organization across all course materials</p>
+            </div>
+            <div class="feat-card">
+              <div class="feat-card-title">📈 Scalability</div>
+              <p>Architecture supporting unlimited content growth and multiple courses</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REQUIREMENTS -->
+    <div class="section-card" id="requirements">
+      <div class="section-header">
+        <div class="section-icon si-orange">📋</div>
+        <div class="section-header-text">
+          <h2>System Requirements</h2>
+          <p>Backend, frontend, and data format specifications</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="req-grid">
+          <div class="req-card">
+            <h4>⚙️ Backend Requirements</h4>
+            <ul class="doc-list">
+              <li>Python environment with PDF processing libraries</li>
+              <li>Adobe Acrobat Pro for batch conversion</li>
+              <li>Ollama AI model for content enhancement</li>
+              <li>Sufficient storage for multi-format file processing</li>
+            </ul>
+          </div>
+          <div class="req-card">
+            <h4>🖥 Frontend Requirements</h4>
+            <ul class="doc-list">
+              <li>Modern web browser with JavaScript support</li>
+              <li>React development environment for customization</li>
+              <li>Network connectivity for real-time features</li>
+              <li>Screen resolution supporting responsive design</li>
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="sub-label">Data Format Specifications</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div class="kv-row"><span class="kv-key">Input</span><span class="kv-val">PDF files with embedded bookmark structure</span></div>
+            <div class="kv-row"><span class="kv-key">Intermediate</span><span class="kv-val">CSV · XML 1.0 · JSON-LD</span></div>
+            <div class="kv-row"><span class="kv-key">Output</span><span class="kv-val">Integrated JSON database with web application interface</span></div>
+            <div class="kv-row"><span class="kv-key">Export</span><span class="kv-val">CSV · JSON for external analysis</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <span>OrchardView · Technical Documentation · Lynn Coupal</span>
+  <div class="footer-pills">
+    <span class="footer-pill">WCAG 2.2 AA</span>
+    <span class="footer-pill">Design Systems for Education</span>
+  </div>
+</footer>
+
+<script>
+  // Smooth scroll for TOC links
+  document.querySelectorAll('.toc a').forEach(link => {
+    link.addEventListener('click', e => {
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Active TOC highlighting on scroll
+  const sections = document.querySelectorAll('[id]');
+  const tocLinks = document.querySelectorAll('.toc a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
